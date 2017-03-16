@@ -1,0 +1,36 @@
+package com.huiju.weixin.WeixinServer.mapper;
+
+import com.huiju.weixin.WeixinServer.bean.UserLockKeyBean;
+import com.huiju.weixin.WeixinServer.model.KeyTb;
+
+public interface KeyTbMapper {
+    int deleteByPrimaryKey(Integer id);
+
+    int insert(KeyTb record);
+
+    int insertSelective(KeyTb record);
+
+    KeyTb selectByPrimaryKey(Integer id);
+
+    int updateByPrimaryKeySelective(KeyTb record);
+
+    int updateByPrimaryKey(KeyTb record);
+    
+    /**
+     * 根据活码获取钥匙信息
+     * @param ticketId 活码
+     * @return
+     */
+    KeyTb getByTicketId(String ticketId);
+	
+	/**
+	 * 根据keyId 获取钥匙信息
+	 * @param keyId 钥匙的keyid
+	 * @return
+	 */
+	UserLockKeyBean getByKeyId(String keyId);
+
+	KeyTb getByDeviceId(String deviceId);
+	
+	KeyTb getKeyTbByKeyId(String keyId);
+}

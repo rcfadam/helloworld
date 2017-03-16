@@ -1,0 +1,8 @@
+.classpath
+.settings/*
+.project
+/target/*
+.class
+.war
+/src/main/webapp/WEB-INF/classes/*
+/target/

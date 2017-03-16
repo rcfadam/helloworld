@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huiju.weixin.WeixinServer.mapper.KeyTbMapper">
+  <resultMap id="BaseResultMap" type="com.huiju.weixin.WeixinServer.model.KeyTb">
+    <id column="id" jdbcType="INTEGER" property="kid" />
+    <result column="key_id" jdbcType="VARCHAR" property="keyId" />
+    <result column="device_id" jdbcType="VARCHAR" property="deviceId" />
+    <result column="key_name" jdbcType="VARCHAR" property="keyName" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="position" jdbcType="INTEGER" property="position" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
+    <result column="state" jdbcType="CHAR" property="state" />
+    <result column="bind_time" jdbcType="TIMESTAMP" property="bindTime" />
+    <result column="tooth_code" jdbcType="VARCHAR" property="toothCode" />
+    <result column="qrcode" jdbcType="VARCHAR" property="qrcode" />
+    <result column="manage" jdbcType="CHAR" property="manage" />
+    <result column="note" jdbcType="VARCHAR" property="note" />
+    <result column="version" jdbcType="VARCHAR" property="version" />
+    <result column="ticket_id" jdbcType="VARCHAR" property="ticketId" />
+    <result column="qrcode_serial" jdbcType="VARCHAR" property="qrcodeSerial" />
+    <result column="mac" jdbcType="VARCHAR" property="mac" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, key_id, device_id, key_name, type, position, create_time, creator, state, bind_time, 
+    tooth_code, qrcode, manage, note, version, ticket_id, qrcode_serial, mac
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from key_tb
+    where id = #{kid,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from key_tb
+    where id = #{kid,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.huiju.weixin.WeixinServer.model.KeyTb">
+    insert into key_tb (id, key_id, device_id, 
+      key_name, type, position, 
+      create_time, creator, state, 
+      bind_time, tooth_code, qrcode, 
+      manage, note, version, 
+      ticket_id, qrcode_serial, mac
+      )
+    values (#{kid,jdbcType=INTEGER}, #{keyId,jdbcType=VARCHAR}, #{deviceId,jdbcType=VARCHAR}, 
+      #{keyName,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{position,jdbcType=INTEGER}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{creator,jdbcType=VARCHAR}, #{state,jdbcType=CHAR}, 
+      #{bindTime,jdbcType=TIMESTAMP}, #{toothCode,jdbcType=VARCHAR}, #{qrcode,jdbcType=VARCHAR}, 
+      #{manage,jdbcType=CHAR}, #{note,jdbcType=VARCHAR}, #{version,jdbcType=VARCHAR}, 
+      #{ticketId,jdbcType=VARCHAR}, #{qrcodeSerial,jdbcType=VARCHAR}, #{mac,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.huiju.weixin.WeixinServer.model.KeyTb">
+    insert into key_tb
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="kid != null">
+        id,
+      </if>
+      <if test="keyId != null">
+        key_id,
+      </if>
+      <if test="deviceId != null">
+        device_id,
+      </if>
+      <if test="keyName != null">
+        key_name,
+      </if>
+      <if test="type != null">
+        type,
+      </if>
+      <if test="position != null">
+        position,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="creator != null">
+        creator,
+      </if>
+      <if test="state != null">
+        state,
+      </if>
+      <if test="bindTime != null">
+        bind_time,
+      </if>
+      <if test="toothCode != null">
+        tooth_code,
+      </if>
+      <if test="qrcode != null">
+        qrcode,
+      </if>
+      <if test="manage != null">
+        manage,
+      </if>
+      <if test="note != null">
+        note,
+      </if>
+      <if test="version != null">
+        version,
+      </if>
+      <if test="ticketId != null">
+        ticket_id,
+      </if>
+      <if test="qrcodeSerial != null">
+        qrcode_serial,
+      </if>
+      <if test="mac != null">
+        mac,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="kid != null">
+        #{kid,jdbcType=INTEGER},
+      </if>
+      <if test="keyId != null">
+        #{keyId,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceId != null">
+        #{deviceId,jdbcType=VARCHAR},
+      </if>
+      <if test="keyName != null">
+        #{keyName,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="position != null">
+        #{position,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator != null">
+        #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null">
+        #{state,jdbcType=CHAR},
+      </if>
+      <if test="bindTime != null">
+        #{bindTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="toothCode != null">
+        #{toothCode,jdbcType=VARCHAR},
+      </if>
+      <if test="qrcode != null">
+        #{qrcode,jdbcType=VARCHAR},
+      </if>
+      <if test="manage != null">
+        #{manage,jdbcType=CHAR},
+      </if>
+      <if test="note != null">
+        #{note,jdbcType=VARCHAR},
+      </if>
+      <if test="version != null">
+        #{version,jdbcType=VARCHAR},
+      </if>
+      <if test="ticketId != null">
+        #{ticketId,jdbcType=VARCHAR},
+      </if>
+      <if test="qrcodeSerial != null">
+        #{qrcodeSerial,jdbcType=VARCHAR},
+      </if>
+      <if test="mac != null">
+        #{mac,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.huiju.weixin.WeixinServer.model.KeyTb">
+    update key_tb
+    <set>
+      <if test="keyId != null">
+        key_id = #{keyId,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceId != null">
+        device_id = #{deviceId,jdbcType=VARCHAR},
+      </if>
+      <if test="keyName != null">
+        key_name = #{keyName,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="position != null">
+        position = #{position,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator != null">
+        creator = #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null">
+        state = #{state,jdbcType=CHAR},
+      </if>
+      <if test="bindTime != null">
+        bind_time = #{bindTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="toothCode != null">
+        tooth_code = #{toothCode,jdbcType=VARCHAR},
+      </if>
+      <if test="qrcode != null">
+        qrcode = #{qrcode,jdbcType=VARCHAR},
+      </if>
+      <if test="manage != null">
+        manage = #{manage,jdbcType=CHAR},
+      </if>
+      <if test="note != null">
+        note = #{note,jdbcType=VARCHAR},
+      </if>
+      <if test="version != null">
+        version = #{version,jdbcType=VARCHAR},
+      </if>
+      <if test="ticketId != null">
+        ticket_id = #{ticketId,jdbcType=VARCHAR},
+      </if>
+      <if test="qrcodeSerial != null">
+        qrcode_serial = #{qrcodeSerial,jdbcType=VARCHAR},
+      </if>
+      <if test="mac != null">
+        mac = #{mac,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{kid,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.huiju.weixin.WeixinServer.model.KeyTb">
+    update key_tb
+    set key_id = #{keyId,jdbcType=VARCHAR},
+      device_id = #{deviceId,jdbcType=VARCHAR},
+      key_name = #{keyName,jdbcType=VARCHAR},
+      type = #{type,jdbcType=INTEGER},
+      position = #{position,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      creator = #{creator,jdbcType=VARCHAR},
+      state = #{state,jdbcType=CHAR},
+      bind_time = #{bindTime,jdbcType=TIMESTAMP},
+      tooth_code = #{toothCode,jdbcType=VARCHAR},
+      qrcode = #{qrcode,jdbcType=VARCHAR},
+      manage = #{manage,jdbcType=CHAR},
+      note = #{note,jdbcType=VARCHAR},
+      version = #{version,jdbcType=VARCHAR},
+      ticket_id = #{ticketId,jdbcType=VARCHAR},
+      qrcode_serial = #{qrcodeSerial,jdbcType=VARCHAR},
+      mac = #{mac,jdbcType=VARCHAR}
+    where id = #{kid,jdbcType=INTEGER}
+  </update>
+  <select id="getByTicketId" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from key_tb
+    where ticket_id = #{ticketId,jdbcType=VARCHAR}
+  </select>
+   <select id="getKeyTbByKeyId" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from key_tb
+    where key_id = #{keyId,jdbcType=VARCHAR}
+  </select>
+  <select id="getByKeyId" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from key_tb
+    where key_id = #{keyId,jdbcType=VARCHAR}
+  </select>
+   <select id="getByQrcodeSerial" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from key_tb
+    where qrcode_serial = #{qrcodeSerial,jdbcType=VARCHAR}
+  </select>
+  <select id="findKeyTbByDeviceId" resultMap="BaseResultMap">
+	   select 
+    <include refid="Base_Column_List" />
+    from key_tb
+    where device_id = #{deviceId,jdbcType=VARCHAR}
+	</select>
+</mapper>

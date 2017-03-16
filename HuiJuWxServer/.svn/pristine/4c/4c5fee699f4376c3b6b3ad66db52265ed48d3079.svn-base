@@ -1,0 +1,388 @@
+package com.huiju.weixin.WeixinServer.controller;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.huiju.weixin.WeixinServer.bean.ResponseCode;
+import com.huiju.weixin.WeixinServer.bean.RestResponse;
+import com.huiju.weixin.WeixinServer.bean.UserLockKeyBean;
+import com.huiju.weixin.WeixinServer.bean.WxMpDeviceJsonMessage;
+import com.huiju.weixin.WeixinServer.conf.StartupConfig;
+import com.huiju.weixin.WeixinServer.model.KeyTable;
+import com.huiju.weixin.WeixinServer.model.KeyTb;
+import com.huiju.weixin.WeixinServer.model.LockKeyTb;
+import com.huiju.weixin.WeixinServer.model.UserLockTb;
+import com.huiju.weixin.WeixinServer.model.UserTb;
+import com.huiju.weixin.WeixinServer.service.LockKeyService;
+import com.huiju.weixin.WeixinServer.service.UserLockService;
+import com.huiju.weixin.WeixinServer.service.UserService;
+
+import me.chanjar.weixin.common.bean.WxJsapiSignature;
+import me.chanjar.weixin.common.exception.WxErrorException;
+import me.chanjar.weixin.common.util.StringUtils;
+import me.chanjar.weixin.mp.api.WxMpConfigStorage;
+import me.chanjar.weixin.mp.api.WxMpMessageRouter;
+import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.bean.WxMpXmlMessage;
+import me.chanjar.weixin.mp.bean.WxMpXmlOutMessage;
+import me.chanjar.weixin.mp.bean.result.WxMpOAuth2AccessToken;
+import me.chanjar.weixin.mp.util.json.WxMpGsonBuilder;
+
+@Controller
+public class BusinessController {
+	private static final Logger logger = Logger.getLogger(BusinessController.class);
+	
+	@Autowired
+	private StartupConfig startupConfig;
+	
+	@Autowired
+	private UserLockService userLockService;
+
+	@Autowired
+	private LockKeyService lockKeyService;
+
+	@Autowired
+	private UserService userService;
+
+	@RequestMapping("/")
+	@ResponseBody
+	public void handleAll(HttpServletRequest request, HttpServletResponse response) throws IOException, WxErrorException {
+		logger.info("received msg.");
+		WxMpService wxMpService = startupConfig.getWxMpService();
+		WxMpMessageRouter wxMpMessageRouter = startupConfig.getWxMpMessageRouter();
+		WxMpConfigStorage wxMpConfigStorage = startupConfig.getWxMpConfigStorage();
+		String accessToken = wxMpService.getAccessToken();
+		logger.info("accessToken: " + accessToken);
+		 String signature = request.getParameter("signature");
+		    String nonce = request.getParameter("nonce");
+		    String timestamp = request.getParameter("timestamp");
+		    logger.info("signature: " + signature + ", nonce: " + nonce + ", timestamp: " + timestamp);
+		    if (!wxMpService.checkSignature(timestamp, nonce, signature)) {
+		      // 消息签名不正确，说明不是公众平台发过来的消息
+		    	logger.info("check false.");
+		      response.getWriter().print("非法请求");
+		      return;
+		    }
+
+		    String echostr = request.getParameter("echostr");
+		    if (StringUtils.isNotBlank(echostr)) {
+		      // 说明是一个仅仅用来验证的请求，回显echostr
+		    	logger.info("check true.");
+		      response.getWriter().print(echostr);
+		      return;
+		    }
+		    String encryptType = StringUtils.isBlank(request.getParameter("encrypt_type")) ?
+		            "raw" :
+		            request.getParameter("encrypt_type");
+
+		        if ("raw".equals(encryptType)) {
+		          // 明文传输的消息
+		        String body = IOUtils.toString(request.getInputStream(), "UTF-8");
+		        logger.info("body: " + body);
+		          WxMpXmlMessage inMessage = WxMpXmlMessage.fromXml(body);
+		          WxMpXmlOutMessage outMessage = wxMpMessageRouter.route(inMessage);
+		          response.getWriter().write(outMessage.toXml());
+		          return;
+		        }
+
+		        if ("aes".equals(encryptType)) {
+		          // 是aes加密的消息
+		          String msgSignature = request.getParameter("msg_signature");
+		          WxMpXmlMessage inMessage = WxMpXmlMessage.fromEncryptedXml(request.getInputStream(), wxMpConfigStorage, timestamp, nonce, msgSignature);
+		          WxMpXmlOutMessage outMessage = wxMpMessageRouter.route(inMessage);
+		          response.getWriter().write(outMessage.toEncryptedXml(wxMpConfigStorage));
+		          return;
+		        }
+
+		        response.getWriter().println("不可识别的加密类型");
+		        return;
+	}
+	
+	
+	@RequestMapping("/device")
+	@ResponseBody
+	public void handleAllDevice(HttpServletRequest request, HttpServletResponse response) throws IOException, WxErrorException {
+		logger.info("received msg.");
+		WxMpService wxMpService = startupConfig.getWxMpService();
+//		WxMpMessageRouter wxMpMessageRouter = startupConfig.getWxMpMessageRouter();
+//		WxMpConfigStorage wxMpConfigStorage = startupConfig.getWxMpConfigStorage();
+		String accessToken = wxMpService.getAccessToken();
+		logger.info("accessToken: " + accessToken);
+		 String signature = request.getParameter("signature");
+		    String nonce = request.getParameter("nonce");
+		    String timestamp = request.getParameter("timestamp");
+		    logger.info("signature: " + signature + ", nonce: " + nonce + ", timestamp: " + timestamp);
+		    if (!wxMpService.checkSignature(timestamp, nonce, signature)) {
+		      // 消息签名不正确，说明不是公众平台发过来的消息
+		    	logger.info("check false.");
+		      response.getWriter().print("非法请求");
+		      return;
+		    }
+
+		    String echostr = request.getParameter("echostr");
+		    if (StringUtils.isNotBlank(echostr)) {
+		      // 说明是一个仅仅用来验证的请求，回显echostr
+		    	logger.info("check true.");
+		      response.getWriter().print(echostr);
+		      return;
+		    }
+		    String encryptType = StringUtils.isBlank(request.getParameter("encrypt_type")) ?
+		            "raw" :
+		            request.getParameter("encrypt_type");
+
+		        if ("raw".equals(encryptType)) {
+		          // 明文传输的消息
+		        String body = IOUtils.toString(request.getInputStream(), "UTF-8");
+		        logger.info("-----body: " + body);
+		        WxMpDeviceJsonMessage inMessage = WxMpGsonBuilder.INSTANCE.create().fromJson(body, WxMpDeviceJsonMessage.class);
+		        String msgType = inMessage.getMsgType();
+		        if("bind".equals(msgType)){
+		        	UserTb user=null;
+		        	if((user = userService.checkUser(inMessage.getOpenId()))==null){
+		        		//检查用户不存在时添加用户
+		        		user = new UserTb();
+		        		user.setOpenId(inMessage.getOpenId());
+		        		user.setUserId(inMessage.getOpenId());
+		        		userService.addUser(user);
+		        	}
+		        	//绑定包
+		        	List<UserLockTb> locks = userLockService.getLockByOpenIdAndDeviceId(inMessage.getOpenId(), inMessage.getDeviceId());
+		        	//如果有与openid相同的设备就强制解绑
+		        	if(userLockService.unbindAllLockKey(inMessage.getOpenId(), locks)>0){
+		        		 
+		        		return;
+		        	}
+		        	List<Object> locksByDevice =  lockKeyService.findLocksbydeviceId(inMessage.getDeviceId());
+		        	UserLockTb newLock=new UserLockTb();
+		         	newLock.setOpenId(inMessage.getOpenId());
+		         	newLock.setLockId(((LockKeyTb)locksByDevice.get(0)).getLockId());
+					userLockService.bindDevice(newLock);
+		        	response.getWriter().write(body);
+		        } 
+		        if("unbind".equals(msgType)){
+		        	//用户点击微信设置里的【删除设备】来删除设备
+		        	List<UserLockTb> locks = userLockService.getLockByOpenIdAndDeviceId(inMessage.getOpenId(), inMessage.getDeviceId());
+		        	if(locks.isEmpty()){
+		        		return;
+		        	}
+		        	 userLockService.unbindAllLockKey(inMessage.getOpenId(), locks); 
+		        	response.getWriter().write(body);
+		        }
+		          return;
+		        }
+
+		        if ("aes".equals(encryptType)) {
+		          // 是aes加密的消息
+///		          String msgSignature = request.getParameter("msg_signature");
+//		          WxMpXmlMessage inMessage = WxMpXmlMessage.fromEncryptedXml(request.getInputStream(), wxMpConfigStorage, timestamp, nonce, msgSignature);
+//		          WxMpXmlOutMessage outMessage = wxMpMessageRouter.route(inMessage);
+//		          response.getWriter().write(outMessage.toEncryptedXml(wxMpConfigStorage));
+		          return;
+		        }
+
+		        response.getWriter().println("不可识别的加密类型");
+		        return;
+	}
+	
+	@GetMapping("/getSysInfo")
+	@ResponseBody
+	public Map<String, Object> getSysInfo(HttpServletRequest request) throws WxErrorException{
+		WxMpService wxMpService = startupConfig.getWxMpService();
+		String openId = request.getParameter("openid");
+		logger.info("openid from request: " + openId);
+		WxJsapiSignature wxSignature = wxMpService.createJsapiSignature("http://live-smart.com.cn/index.html?openid="+openId);
+		Map<String, Object> data = new HashMap<String,Object>();
+		if(wxSignature != null){
+			long timestamp = wxSignature.getTimestamp();
+			String noncestr = wxSignature.getNoncestr();
+			String signature = wxSignature.getSignature();
+			logger.info("timestamp: " + timestamp + ", noncestr: " + noncestr + ", signature: " + signature);
+			data.put("timestamp", timestamp);
+			data.put("noncestr", noncestr);
+			data.put("signature", signature);
+		}
+		return data;
+	}
+	
+	@GetMapping("/getSysInfoByUrl")
+	@ResponseBody
+	public Map<String,Object> getSysInfoByUrl(HttpServletRequest request) throws WxErrorException{
+		WxMpService wxMpService = startupConfig.getWxMpService();
+		String url = request.getParameter("url");
+		logger.info("url from request: " + url);
+		WxJsapiSignature wxSignature = wxMpService.createJsapiSignature(url);
+		Map<String, Object> data = new HashMap<String,Object>();
+		if(wxSignature != null){
+			long timestamp = wxSignature.getTimestamp();
+			String noncestr = wxSignature.getNoncestr();
+			String signature = wxSignature.getSignature();
+			logger.info("timestamp: " + timestamp + ", noncestr: " + noncestr + ", signature: " + signature);
+			data.put("timestamp", timestamp);
+			data.put("noncestr", noncestr);
+			data.put("signature", signature);
+		}
+		return data;
+	}
+	
+	
+	
+	@GetMapping("/getOpenId")
+	@ResponseBody
+	public Map<String, Object> getOpenId(HttpServletRequest request) throws WxErrorException{
+		WxMpService wxMpService = startupConfig.getWxMpService();
+		String code = request.getParameter("code");
+		logger.info("code from request: " + code);
+		WxMpOAuth2AccessToken wxMpOAuth2AccessToken = wxMpService.oauth2getAccessToken(code);
+//		WxMpUser wxMpUser = wxMpService.oauth2getUserInfo(wxMpOAuth2AccessToken, null);
+		Map<String, Object> data = new HashMap<String,Object>();
+		if(wxMpOAuth2AccessToken != null){
+			data.put("open_id", wxMpOAuth2AccessToken.getOpenId());
+		}
+		return data;
+	}
+	
+	
+	@RequestMapping("/devicelist")
+	@ResponseBody
+	public RestResponse getLockList(@RequestParam(required = true) String openId){
+		List<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
+		List<UserLockTb> locks = userLockService.getLockByOpenId(openId);
+		logger.info("openID="+openId);
+		if(!CollectionUtils.isEmpty(locks)){
+			for(int index = 0;index<locks.size();index++){
+				UserLockTb lock  = locks.get(index);
+				Map<String, Object> data = new HashMap<String,Object>();
+				List<KeyTb> keyList = lockKeyService.findKeyListByLockId(lock.getLockId(),1);
+				data.put("keyList", keyList);
+				data.put("lockId", lock.getLockId());
+				data.put("show", index<1?true:false);//是为了默认让第一个锁的钥匙列表显示出来  不是出于折叠状态
+				data.put("locktb", lock.getLockTb());
+				data.put("usertb", lock.getUserTb());
+				result.add(data);
+			}
+		}
+		return RestResponse.build(ResponseCode.SUCCESS, result);
+	}
+	
+	@RequestMapping("/unbindKey")
+	@ResponseBody
+	public RestResponse unbindKey(@RequestParam(required = true)String ticket,@RequestParam(required = true) String deviceId,@RequestParam(required = true) String openId){
+		UserLockKeyBean key = lockKeyService.getKeyByDeviceId(deviceId);
+		if(key == null){
+			return RestResponse.build(ResponseCode.DEVICE_NOT_EXIST);
+		}
+		if(!key.getOpenId().equals(openId)){
+			return RestResponse.build(ResponseCode.DEVICE_NOT_BIND);
+		}
+		if(key.getType() == 1){
+			//蓝牙管理钥匙
+			userLockService.unbindAllLockKey(openId,userLockService.getLockByOpenIdAndDeviceId(openId, deviceId));
+		}else{
+			lockKeyService.unbindKey(key.getLockId(),key.getKeyId());
+		}
+		return RestResponse.build(ResponseCode.SUCCESS);
+	}
+	
+	@RequestMapping("/unbindLock")
+	@ResponseBody
+	public RestResponse unbindLock(@RequestParam(required = true)String ticket,@RequestParam(required = true) String lockId,@RequestParam(required = true) String openId,@RequestParam(required=true) String deviceId){
+		KeyTable key = new KeyTable();
+		key.setLockId(lockId);
+		ResponseCode restResponse = ResponseCode.USER_NOT_BIND;	
+	    if(userLockService.compelUnbindDevice(openId, deviceId)){
+	    	restResponse = ResponseCode.SUCCESS;
+	    }
+		return RestResponse.build(restResponse);
+	}
+	
+	@RequestMapping("/getKeyId")
+	@ResponseBody
+	public RestResponse getKeyId(@RequestParam(required = true)String ticketId,@RequestParam(required = true)String lockId){
+		KeyTb userLockKeyBean = lockKeyService.getKeyByTicketId(ticketId);
+		if(userLockKeyBean.getType() != 1){
+			LockKeyTb key = new LockKeyTb();
+			key.setLockId(lockId);
+			lockKeyService.save(key);
+		}
+		Map<String, String> data = new HashMap<String,String>();
+		data.put("keyID", userLockKeyBean.getKeyId());
+		return RestResponse.build(ResponseCode.SUCCESS, data);
+	}
+	
+	@RequestMapping("/addKey")
+	@ResponseBody
+	public RestResponse addKey(@RequestParam(required = true)String position,@RequestParam(required = true)String keyId,@RequestParam(required = true)String lockId){
+		KeyTb key = lockKeyService.getKeyByKeyId(keyId); 
+		if(key.getType() == 1){
+			return RestResponse.build(ResponseCode.REQUEST_FAIL);
+		}
+		
+		key.setState("1");//1启动 2禁止 首次添加 默认启动
+		key.setPosition(Integer.parseInt(position));
+		LockKeyTb lockkey = new LockKeyTb();
+		lockkey.setKeyId(keyId);
+		lockkey.setLockId(lockId);
+		lockKeyService.addkey(key,lockkey);
+		return RestResponse.build(ResponseCode.SUCCESS);
+	}
+	
+	@RequestMapping("/removeKey")
+	@ResponseBody
+	public RestResponse removeKey(@RequestParam(required = true)String lockId,@RequestParam(required = true)String keyId){
+		KeyTb userLockKeyBean = lockKeyService.getKeyByKeyId(keyId);
+		if(userLockKeyBean.getId() == null){
+			return RestResponse.build(ResponseCode.DEVICE_NOT_EXIST);
+		}
+		lockKeyService.deleteKey(lockId,keyId); 
+		return RestResponse.build(ResponseCode.SUCCESS);
+	}
+	
+	@RequestMapping("/getKeyInfo")
+	@ResponseBody
+	public RestResponse getKeyInfo(@RequestParam(required = true)String lockId){
+		List<Map<String, String>> data = new ArrayList<Map<String,String>>();
+		List<KeyTb> list = lockKeyService.findKeyListByLockId(lockId,0);
+		if(!CollectionUtils.isEmpty(list)){
+			for(KeyTb key:list){
+				Map<String, String> info = new HashMap<String,String>();
+				info.put("keyID", key.getKeyId());
+				if(key.getDeviceId() != null){
+					info.put("device_id", key.getDeviceId());
+				}
+				info.put("position", String.valueOf(key.getPosition()));
+				info.put("type", String.valueOf(key.getType()));
+				info.put("status", key.getState());
+				data.add(info);
+			}
+		}
+		return RestResponse.build(ResponseCode.SUCCESS, data);
+	}
+	
+	@RequestMapping("/changeKeyStatus")
+	@ResponseBody
+	public RestResponse changeKeyStatus(@RequestParam(required = true)String keyId,@RequestParam(required = true)String deviceId,@RequestParam(required = true)String keyState){
+		KeyTb keyTable = lockKeyService.getKeyTbByKeyId(keyId);
+		if(keyTable.getId() == null){
+			return RestResponse.build(ResponseCode.DEVICE_NOT_EXIST);
+		}
+		keyTable.setState(keyState);
+		lockKeyService.updateKey(keyTable);
+		return RestResponse.build(ResponseCode.SUCCESS);
+	}
+}

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, user-scalable=0">
+<meta name="format-detection" content="telephone=no" />
+<meta http-equiv="Cache-Control"
+	content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<head>
+<title></title>
+<!-- <link rel="stylesheet" type="text/css" href="https://res.wx.qq.com/open/libs/weui/0.4.3/weui.min.css"> -->
+ <link href="libs/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+  	<link href="libs/bootstrap/css/bootstrap-buttons.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" type="text/css" href="css/toaster.min.css">
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<script src="libs/angular/angular.min.js"></script>
+<script src="libs/angular-ui/angular-ui-router.min.js"></script>
+<script src="libs/jquery-3.1.0.min.js"></script>
+<script src="libs/bootstrap/js/bootstrap.min.js"></script>
+<script src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script src="libs/toaster.min.js"></script>
+<script src="js/app.js"></script>
+<script src="js/controllers.js"></script>
+<script src="js/services.js"></script>
+</head>
+<body ng-controller="mainController">
+	<!-- 视图容器 -->
+	<div ui-view></div>
+</body>
+</html>

@@ -1,0 +1,178 @@
+package com.huiju.weixin.WeixinServer.service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.huiju.weixin.WeixinServer.conf.StartupConfig;
+import com.huiju.weixin.WeixinServer.mapper.UserLockTbMapper;
+import com.huiju.weixin.WeixinServer.model.UserLockTb;
+import com.huiju.weixin.WeixinServer.util.WxResp;
+
+import me.chanjar.weixin.common.exception.WxErrorException;
+import me.chanjar.weixin.common.util.http.SimplePostRequestExecutor;
+import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.util.json.WxMpGsonBuilder;
+
+/**
+ * 处理微信用户和锁之间关系的业务类 (用户和锁之间的关系建立是通过钥匙建立的)
+ * 
+ * @author rencf 2016年11月10日10:58:39
+ */
+@Service
+public class UserLockService {
+
+	@Autowired
+	private UserLockTbMapper userLockTbMapper;
+
+	@Autowired
+	private StartupConfig startupConfig;
+
+	private static final Logger logger = Logger.getLogger(UserLockService.class);
+
+	/**
+	 * 绑定设备
+	 * 
+	 * @param userLockTb
+	 *            传递参数是 openId 和 lockId
+	 * @return true or false
+	 */
+	@Transactional
+	public int bindDevice(UserLockTb userLockTb) {
+		userLockTb.preInsert();
+		return userLockTbMapper.insert(userLockTb);
+	}
+
+	/**
+	 * 解绑设备
+	 * 
+	 * @param id
+	 *            要删除锁用户关系表记录的主键ID
+	 * @param openId
+	 *            用户ID
+	 * @param deviceId
+	 *            设备id
+	 * @param ticket
+	 *            jsapi 参数
+	 * @return true or false
+	 */
+	public boolean unbindDevice(Integer id, String openId, String deviceId, String ticket) {
+		WxMpService wxMpService = startupConfig.getWxMpService();
+		boolean isok = false;
+		try {
+			String url = "https://api.weixin.qq.com/device/unbind";
+			Map<String, String> data = new HashMap<String, String>();
+			data.put("device_id", deviceId);
+			data.put("openid", openId);
+			data.put("ticket", ticket);
+			String resultContent = wxMpService.execute(new SimplePostRequestExecutor(), url,
+					WxMpGsonBuilder.INSTANCE.create().toJson(data));
+			logger.info("result: " + resultContent);
+			WxResp resp = WxMpGsonBuilder.INSTANCE.create().fromJson(resultContent, WxResp.class);
+			if (resp.getBaseResp().getErrcode() == 0) {
+				// 解绑成功
+				logger.info("unbind success.");
+				if (userLockTbMapper.deleteByPrimaryKey(id) > 0) {
+					isok = true;
+				} else {
+					logger.info("删除用户和设备锁关系失败");
+				}
+			} else {
+				logger.info("unbind fail.");
+			}
+		} catch (WxErrorException e) {
+			logger.error("unbindDevice fail :" + e.getMessage());
+		}
+		return isok;
+	}
+
+	// 强制解绑和openId有关系的设备
+	@Transactional
+	public int unbindAllLockKey(String openId, List<UserLockTb> locks) {
+		int i = 0;
+		for (UserLockTb lock : locks) {
+			Map<String, Object> map  = new HashMap<String,Object>();
+			map.put("openId", openId);
+			map.put("lockId", lock.getLockId());
+			userLockTbMapper.deleteByOpenIdAndLockId(map);
+			i++;
+		}
+		 return i;
+		
+	}
+
+	/**
+	 * 强制解绑设备
+	 * 
+	 * @param id
+	 * @param openId
+	 * @param deviceId
+	 * @return
+	 */
+	public boolean compelUnbindDevice(String openId, String deviceId) {
+		WxMpService wxMpService = startupConfig.getWxMpService();
+		boolean isok = false;
+		try {
+			String url = "https://api.weixin.qq.com/device/compel_unbind";
+			Map<String, String> data = new HashMap<String, String>();
+			data.put("device_id", deviceId);
+			data.put("openid", openId);
+			String resultContent = wxMpService.execute(new SimplePostRequestExecutor(), url,
+					WxMpGsonBuilder.INSTANCE.create().toJson(data));
+			logger.info("result: " + resultContent);
+			WxResp resp = WxMpGsonBuilder.INSTANCE.create().fromJson(resultContent, WxResp.class);
+			if (resp.getBaseResp().getErrcode() == 0) {
+				// 强制解绑成功
+				logger.info("unbind success.");
+				this.unbindAllLockKey(openId, this.getLockByOpenIdAndDeviceId(openId, deviceId));
+				isok = true;
+			} else {
+				logger.info("unbind fail.");
+			}
+		} catch (WxErrorException e) {
+			logger.error("unbindDevice fail :" + e.getMessage());
+		}
+		return isok;
+	}
+	
+	/**
+	 * 根据设备ID和openid获取锁列表 
+	 * @param openId
+	 * @param deviceId
+	 * @return
+	 */
+	public List<UserLockTb> getLockByOpenIdAndDeviceId(String openId, String deviceId) {
+		Map<String,Object> map = new HashMap<String,Object>();
+		//List<Object> lockids = lockKeyTbMapper.findLocksbydeviceId(map);
+		map = new HashMap<String,Object>();
+		map.put("openId", openId);
+	//	map.put("lockids", lockids);
+		map.put("deviceId", deviceId);
+		List<UserLockTb> lockResult = userLockTbMapper.findLockIdsByOpenIdAndDeviceId( map);
+		return lockResult==null?new ArrayList<UserLockTb>():lockResult;
+	}
+	
+	/**
+	 * 根据openid 获取锁列表
+	 * @param openId
+	 * @return
+	 */
+	public List<UserLockTb> getLockByOpenId(String openId) {
+		return userLockTbMapper.getLockByOpenId(openId);
+	}
+	//解绑某一个具体的设备锁与用户的关系
+	@Transactional
+	public void unbindLock(String ticket, String openId, String lockId) {
+		Map<String, Object> map  = new HashMap<String,Object>();
+		map.put("openId", openId);
+		map.put("lockId", lockId);
+		 userLockTbMapper.deleteByOpenIdAndLockId(map);
+	}
+
+}

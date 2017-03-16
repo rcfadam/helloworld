@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">  
+      <!-- Simple file output -->  
+ <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+ <!--  <File>/log/common-service.log</File> -->
+  <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+    <!-- daily rollover -->
+    <FileNamePattern>weixin.%d{yyyy-MM-dd}.log</FileNamePattern>
+    <!-- keep 30 days' worth of history -->
+    <maxHistory>30</maxHistory>         
+  </rollingPolicy>
+  <encoder>
+    <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg %n</Pattern>
+  </encoder>        
+</appender>
+  
+  
+  <!-- Console output -->  
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">  
+    <!-- encoder defaults to ch.qos.logback.classic.encoder.PatternLayoutEncoder -->  
+      <encoder>  
+          <pattern>  
+              [%-5level] [%date{yyyy-MM-dd HH:mm:ss}] %logger{96} [%line] - %msg%n  
+          </pattern>  
+          <charset>GBK</charset> <!-- 此处设置字符集 -->  
+      </encoder>  
+    <!-- Only log level WARN and above -->  
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">  
+      <level>DEBUG</level>  
+    </filter>  
+  </appender>  
+  
+  
+  <!-- Enable FILE and STDOUT appenders for all log messages.  
+       By default, only log at level INFO and above. -->  
+  <root level="DEBUG">  
+    <appender-ref ref="FILE" />  
+    <appender-ref ref="STDOUT" />  
+  </root>  
+  
+  <!-- For loggers in the these namespaces, log at all levels. -->  
+<!--   <logger name="pedestal" level="ALL" />  
+  <logger name="hammock-cafe" level="ALL" />  
+  <logger name="user" level="ALL" />   --> 
+  <logger name="com.huiju.weixin.WeixinServer.mapper" level="DEBUG"></logger>
+</configuration>  

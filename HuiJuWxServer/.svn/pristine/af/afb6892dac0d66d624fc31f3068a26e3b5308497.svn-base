@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, user-scalable=0">
+<meta name="format-detection" content="telephone=no" />
+<meta http-equiv="Cache-Control"
+	content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<head>
+<title></title>
+<link rel="stylesheet" type="text/css"
+	href="https://res.wx.qq.com/open/libs/weui/0.4.3/weui.min.css">
+<link rel="stylesheet" type="text/css" href="css/toaster.min.css">
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<script src="libs/angular.min.js"></script>
+<script src="libs/angular-ui-router.min.js"></script>
+<script src="libs/angular-animate.min.js"></script>
+<script src="libs/jquery-3.1.0.min.js"></script>
+<script src="libs/toaster.min.js"></script>
+<script src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script src="js/app.js"></script>
+<script src="js/controllers.js"></script>
+<script src="js/services.js"></script>
+</head>
+<body>
+	<script>
+	var stringToBytes = function(data) {
+		var pos = 0;
+		var len = data.length;
+		if (len % 2 != 0) {return null;}
+		len /= 2;
+		var hexArray = new Array();
+		for (var i = 0; i < len; i++) {
+			var s = data.substr(pos, 2);
+			var v = parseInt(s, 16);
+			hexArray.push(v);
+			pos += 2;
+		}
+		return hexArray;
+	}
+	function alertMsg(data){
+		var str = '';
+		for (var i = 0; i < data.length; i++) {
+			var temp = data.charCodeAt(i).toString(16).toUpperCase();
+			if (temp.length == 1) {
+				temp = '0' + temp;
+			}
+			str += temp;
+		}
+		alert(str);
+	}
+  function ss(){
+	  var msg = String.fromCharCode(0x00)+String.fromCharCode(0x03)
+		+ String.fromCharCode(3)
+		+ String.fromCharCode(1);
+		var keyIdData = stringToBytes("002E003A");
+		var msg2 = "";
+		for (var i=0; i<keyIdData.length; i++) {
+		  msg2 += String.fromCharCode(keyIdData[i]);
+		} 
+      msg = msg.concat(msg2);
+     alertMsg(msg);
+  };
+  ss();
+ </script>
+</body>
+</html>

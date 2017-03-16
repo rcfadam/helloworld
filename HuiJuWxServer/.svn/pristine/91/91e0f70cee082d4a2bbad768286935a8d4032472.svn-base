@@ -1,0 +1,28 @@
+<header class="mui-bar mui-bar-nav">
+    <a class="mui-icon mui-icon-left-nav mui-pull-left mui-action-back"></a>
+    <h1 class="mui-title">详情页</h1>
+    <button class="mui-btn mui-pull-right" ng-click="editKey(isok)" ng-show="!isok">编辑</button>
+    <button class="mui-btn mui-pull-right" ng-click="updateKey(key)" ng-show="isok">保存</button>
+</header>
+<div class="mui-content" style="height:100%">
+	<div class="basic">
+		<p>钥匙Id：{{key.keyTb.keyId}}</p>
+		<p>钥匙名称：{{key.keyTb.keyName}}</p>
+		<p>
+		  <input type="text" ng-model="key.keyTb.keyName" ng-show="isok" class="mui-input-clear"  />
+		</p>
+		<p>钥匙电量：{{key.keyTb.battery}}</p>
+		<p>钥匙固件版本：{{key.keyTb.firmwareVersion}}</p>
+		<p>钥匙软件版本：{{key.keyTb.softwareVersion}}</p>
+		<p>钥匙类型：<span ng-show="key.keyTb.type==1">蓝牙钥匙</span>
+		          <span ng-show="key.keyTb.type==3">电子钥匙</span> 
+		<p>钥匙位置号：{{key.position}}</p>
+		<p>钥匙创建时间：{{key.keyTb.createTime}}</p>
+		<p>钥匙绑定时间：{{key.keyTb.bindTime}}</p>
+		<p>钥匙创建人：{{key.keyTb.creator}}</p>
+		<p>钥匙状态：{{key.keyTb.stateStr}}</p>
+		<p>钥匙牙花：{{key.keyTb.toothCode}}</p>
+		<p>备注：{{key.keyTb.note}}</p>
+		<p><input type="text" ng-model="key.keyTb.note" class="mui-input-clear" ng-show="isok"></p>
+	</div>
+</div>

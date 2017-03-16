@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, user-scalable=0">
+<meta name="format-detection" content="telephone=no" />
+<meta http-equiv="Cache-Control"
+	content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<head>
+<title></title>
+<link rel="stylesheet" type="text/css"
+	href="https://res.wx.qq.com/open/libs/weui/0.4.3/weui.min.css">
+<link rel="stylesheet" type="text/css" href="css/toaster.min.css">
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<script src="libs/jquery-3.1.0.min.js"></script>
+<style>
+ 
+.form{
+  margin-top:3%;
+  margin-left:1%;
+  width:200px;
+  float:left;
+}
+form{
+  width: 100%;
+}
+input{
+  width:200px;
+  height:30px;
+  margin-top:10px;
+  
+}
+ #save{
+   width:100px;
+   height:30px;
+   margin-top:20px;
+   font-size: larger;
+   margin-left:100px;
+	padding:10px 20px;   
+ }
+ select{
+  width:200px;
+  height:30px;
+  margin-top:10px;
+  font-size:larger;
+ }
+ .right{
+    float:left;
+    width:60%;
+ 	margin-left:17%;
+ }
+ .right h3{
+ 
+ }
+  
+</style>
+</head>
+<body>
+<h3>根据设备ID更新设备属性</h3>
+<div class="form">
+<form  method="post" id="form">
+ <label>设备ID：</label><input type="text" placeholder="设备id"  name="deviceId" id="111"/><br />
+ <label>mac地址：</label><input type="text" placeholder="mac地址" name="mac"/><br>
+ <label>connect_protocol：</label><select name="connect_protocol"><option  value="3">ble</option><option value="4">wifi</option><option value="1">android classic bluetooth </option><option value="2">ios classic bluetooth </option></select><br>
+ <label>auth_key:</label><input type="text" placeholder="auth_key" name="auth_key"/><br>
+ <label>close_strategy：</label><select name="close_strategy"><option value="1">退出公众号断开连接</option><option value="2">退出公众号保持连接</option></select><br>
+ <label>conn_strategy：</label><select name="conn_strategy"><option value="1">公众号对话页面不停的尝试连接设备</option><option value="4">处于非公众号页面微信自动连接</option></select><br>
+ <label>crypt_method:</label><select name="crypt_method"><option value="0">不加密</option><option value="1">AES加密</option> </select><br>
+ <label>auth ver:</label><input type="text" placeholder="auth version" name="auth_ver" value="0" readonly="readonly"/><br>
+ <label>manu_mac_pos：</label><select name="manu_mac_pos"><option value="-1">在尾部</option>  <option value="-2"> 不包含mac地址</option>    </select><br>
+ <label>ser_mac_pos</label><select name="ser_mac_pos"><option value="-1">在尾部</option>  <option value="-2"> 不包含mac地址</option>    </select><br>
+ <label>精简协议类型：</label><select name="ble_simple_protocol"><option value="0">非精简协议类型</option><option value="1">精简协议类型</option></select><br>
+ <label>请求操作类型：</label><select name="op_type"><option value="1">设备更新</option></select><br>
+  <span  id="save" >提交</span>
+</form>
+</div>
+<div class="right">
+ <h2>填写说明：</h2>
+ 
+</div>
+	<script>
+      $(function(){
+    	  $("#save").click(function(){
+    		 // var formData = $("#form").serialize();
+    		 var formData = $("#form").serializeArray();
+    		 var jsonObject =  arrayToJSONObject(formData);
+    		 var isok = checkData(jsonObject);
+    		 if(isok==true){
+    			  $.post("/deviceauth",{"postData":toJSON(formData)},function(text,status){alert(text)});
+    		  }else{
+    			  alert("信息填写不完整");
+    		  }
+    	  });
+    	  var arrayToJSONObject = function(arrays){
+    		  var jsonObject = {};
+    		   for(var array in arrays)
+    			  jsonObject[array.name] = array.value;
+    		  return jsonObject;
+    	  }
+    	  var checkData = function(jsonObject){
+    		  var isok  = false;
+    		  if(jsonObject.deviceId==""||jsonObject.mac==""){
+    			  isok =  false;
+    		  }else{
+    			  isok = true;
+    		  }
+    		  return isok;
+    	  }
+    	  var toJSON=function(arrays){
+    		  var str = "{";
+    		  for(var i=0;i<arrays.length;i++){
+    			   str+="'"+arrays[i].name+"':'"+arrays[i].value+"'";
+    			  if(i<arrays.length-1){
+    				  str+=",";
+    			  }
+    		  }
+    		  str+="}";
+    		  return str;
+    	  }
+      })
+      
+      
+    </script>
+</body>
+</html>

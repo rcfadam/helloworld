@@ -1,0 +1,20 @@
+<xml>
+<!-- 正式 -->
+       <appId>wxf410780b57e7f0ad</appId>
+     <secret>6051a05f2ab3a913558868da6dda649c</secret> 
+     <token>c1923045aa3b4f45940f26404df0cd71</token>
+     <aesKey>blXo3Mufs6PIGn79OU3DquygZFzpwPXv0c3jTjtofr7</aesKey>
+    <!--  <deviceType>gh_127f2e348655</deviceType> -->
+       
+    <!-- 测试 -->
+     <!--  <appId>wxb4ba14562eb9a765</appId>
+         <secret>b5123e6cd7a5eefabec0c193cb1102af</secret> 
+         <token>c1923045aa3b4f45940f26404df0cd71</token>
+         <aesKey>IpH2GMqBqn8doZTW5kr4yi4PX5pFCndid1FUDf1NVx0</aesKey> -->
+    <!--  <deviceType>gh_93e08de46d0b</deviceType>   -->
+     
+    <!-- <accessToken>可以不填写</accessToken> -->
+    <expiresTime>7200</expiresTime>
+    <!-- <openId>某个加你公众号的用户的openId</openId>
+    <oauth2redirectUri>网页授权获取用户信息回调地址</oauth2redirectUri> -->
+</xml>

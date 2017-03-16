@@ -1,0 +1,14 @@
+<header class="mui-bar mui-bar-nav">
+    <a class="mui-icon mui-icon-left-nav mui-pull-left mui-action-back"></a>
+    <h1 class="mui-title">添加{{key.keyName}}</h1>
+</header>
+<div class="mui-content" style="height:100%">
+<div class="mui-card">
+	<div class="mui-card-content">
+		<div class="mui-card-content-inner">
+			请打开{{key.keyName}}的开关按钮，然后点击下面确认添加按钮{{key.type}}<br />
+			<button class="mui-btn mui-btn-primary" type="button" ng-click="confirmAddBlueKey(key)">确认</button>
+		 </div>
+	</div>
+</div>
+</div>

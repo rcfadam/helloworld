@@ -1,0 +1,46 @@
+package com.huiju.weixin.WeixinServer.service;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.huiju.weixin.WeixinServer.mapper.UserTbMapper;
+import com.huiju.weixin.WeixinServer.model.UserTb;
+
+/**
+ * 处理用户信息的业务逻辑
+ * @author rencf
+ * 2016年11月10日13:17:00
+ */
+@Service
+public class UserService {
+
+	@Autowired
+	private UserTbMapper userTbMapper;
+	
+	@Transactional
+	public int addUser(UserTb user){
+		user.preInsert();
+		return userTbMapper.insert(user);
+	}
+	
+	/**
+	 * 删除用户信息
+	 * @param user
+	 * @return
+	 */
+	@Transactional
+	public int updateUser(UserTb user){
+		return userTbMapper.updateByPrimaryKey(user);
+	}
+	
+	/**
+	 * 检查用户是否存在
+	 * @param openId
+	 * @return
+	 */
+	public UserTb checkUser(String  openId) {
+		return userTbMapper.getUserByOpenId(openId);
+	}
+}

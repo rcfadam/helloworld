@@ -1,0 +1,37 @@
+ <ion-view>
+ <ion-content>
+      <ion-list>
+          <!--锁列表-->
+        <div ng-repeat="device in deviceList">
+          <ion-item class="item-stable"
+                    ng-click="toggleGroup(device)"
+                    ng-class="{active: isGroupShown(device)}">
+					<div class="lockimg"><span>锁</span></div>
+					<div class="lock-item">
+					   <h2>LockID：{{device.lockId}}</h2>
+					   <p>状态：̬{{device.locktb.state}}</p>
+					   <i class="icon" ng-class="isGroupShown(device) ? 'ion-minus' : 'ion-plus'"></i>
+					</div>
+             <ion-option-button class="button-positive" ng-click="addKey(device.keyList, device)">添加锁</ion-option-button>
+             <ion-option-button class="button-assertive" ng-click="unbindLock(device.keyList, device)">解绑锁</ion-option-button>
+           
+          </ion-item>
+          <!-- 钥匙列表 -->
+          <ion-item class="item-accordion"
+                    ng-repeat="key in device.keyList"
+                    ng-show="isGroupShown(device)">
+                 <div class="keyimg"><span>钥匙</span></div>
+                 <div class="key-item-div">
+				  <h3>keyId：{{key.keyId}}</h3>
+				  <p>钥匙名称：{{key.keyName}}</p>
+				  <p class="key-deviceid">蓝牙钥匙设备ID：{{key.deviceId}}</p>
+				  <p>状态：{{key.stateStr}}</p>
+				</div>
+             <ion-option-button class="button-assertive key-button" ng-click="deleteKey(device,key)">删除钥匙</ion-option-button>
+             <ion-option-button class="button-positive key-button" ng-click="enableKey(key)" ng-show="key.state!=1">启用钥匙</ion-option-button>
+             <ion-option-button class="button-positive key-button" ng-click="disableKey(key)" ng-hide="key.state!=1">禁用钥匙</ion-option-button>
+          </ion-item>
+        </div>
+      </ion-list>
+    </ion-content>
+</ion-view>
